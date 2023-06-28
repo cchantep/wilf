@@ -1,0 +1,31 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+envyaml = "==1.10.211231"
+requests = "==2.31.0"
+python-dateutil = "==2.8.2"
+pymongo = {version = "==4.4.0", extras = ["srv", "tls"]}
+foo = {path = "."}
+
+[dev-packages]
+ipython = "*"
+coverage = "*"
+flake8 = "*"
+flake8-import-order = "*"
+flake8_formatter_junit_xml = "*"
+mypy = "*"
+pytest = "*"
+junit-xml = "*"
+types-requests = "*"
+types-python-dateutil = "*"
+pymongo-stubs = "*"
+# Some comment
+lorem = { version = "==1.3.3", markers = "sys_platform != 'darwin' or platform_machine != 'arm64'" } # sadly, doesn't work on Mac M1 for the moment
+ipsum = { markers = "sys_platform == 'darwin' and platform_machine == 'arm64'", path = "./resources/cpt-1.3.3-cp38-cp38-macosx_12_0_arm64.whl" }
+numpy = "==1.23.3"
+
+[requires]
+python_version = "3.8"

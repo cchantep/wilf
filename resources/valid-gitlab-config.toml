@@ -1,0 +1,3 @@
+[gitlab]
+project_api_packages_url = "https://gitlab.com/api/v4/projects/12345678/packages"
+private_token = "YOUR_PRIVATE_TOKEN"

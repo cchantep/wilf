@@ -1,0 +1,200 @@
+package main
+
+import (
+	"fmt"
+	"testing"
+)
+
+func TestMatchConstraint(t *testing.T) {
+	latestVersion := "v1.2.3"
+
+	tests := []struct {
+		constraint VersionConstraint
+		expected   bool
+	}{
+		// Test cases for valid constraints
+		{
+			constraint: VersionConstraint{">=", "v1.0.0"},
+			expected:   true,
+		},
+		{
+			constraint: VersionConstraint{">", "v1.0.0"},
+			expected:   true,
+		},
+		{
+			constraint: VersionConstraint{"<=", "v1.2.3"},
+			expected:   true,
+		},
+		{
+			constraint: VersionConstraint{"<", "v1.2.4"},
+			expected:   true,
+		},
+		{
+			constraint: VersionConstraint{"==", "v1.2.3"},
+			expected:   true,
+		},
+		{
+			constraint: VersionConstraint{"!=", "v1.2.2"},
+			expected:   true,
+		},
+		{
+			constraint: VersionConstraint{"~=", "v1.2.0"},
+			expected:   true,
+		},
+		{
+			constraint: VersionConstraint{"~", "v1.*"},
+			expected:   true,
+		},
+		{
+			constraint: VersionConstraint{"~", "v1.2.*"},
+			expected:   true,
+		},
+		{
+			constraint: VersionConstraint{"!~", "v1.3.*"},
+			expected:   true,
+		},
+		// Test cases for invalid constraints
+		{
+			constraint: VersionConstraint{"<", "v1.2.3"},
+			expected:   false,
+		},
+		{
+			constraint: VersionConstraint{">", "v1.2.3"},
+			expected:   false,
+		},
+		{
+			constraint: VersionConstraint{">=", "v2.0.0"},
+			expected:   false,
+		},
+		{
+			constraint: VersionConstraint{"<", "v1.0.0"},
+			expected:   false,
+		},
+		{
+			constraint: VersionConstraint{"<=", "v1.2.2"},
+			expected:   false,
+		},
+		{
+			constraint: VersionConstraint{"==", "v1.0.0"},
+			expected:   false,
+		},
+		{
+			constraint: VersionConstraint{"!=", "v1.2.3"},
+			expected:   false,
+		},
+		{
+			constraint: VersionConstraint{"~=", "v1.3.0"},
+			expected:   false,
+		},
+		{
+			constraint: VersionConstraint{"~", "v1.5.*"},
+			expected:   false,
+		},
+		{
+			constraint: VersionConstraint{"!~", "v1.2.*"},
+			expected:   false,
+		},
+	}
+
+	for _, test := range tests {
+		result := MatchConstraint(latestVersion, test.constraint)
+
+		if result != test.expected {
+			t.Errorf("For constraint '%s', expected %v, but got %v", test.constraint, test.expected, result)
+		}
+	}
+}
+
+func TestShouldUpdate(t *testing.T) {
+	latestVersion := "v1.2.3"
+
+	tests := []struct {
+		requirement VersionRequirement
+		expected    bool
+	}{
+		// Test cases for requirements that require an update
+		{VersionRequirement{
+			VersionConstraint{"<", "v1.2.3"},
+		}, true},
+		{VersionRequirement{
+			VersionConstraint{"<=", "v1.2.2"},
+			VersionConstraint{"!=", "v1.2.3"},
+		}, true},
+		{VersionRequirement{
+			VersionConstraint{">=", "v1.0.0"},
+			VersionConstraint{"~=", "v1.3.0"},
+		}, true},
+
+		// Test cases for requirements that don't require an update
+		{VersionRequirement{
+			VersionConstraint{">=", "v1.2.2"},
+		}, false},
+		{VersionRequirement{
+			VersionConstraint{"==", "v1.2.3"},
+		}, false},
+		{VersionRequirement{
+			VersionConstraint{">=", "v1.2.3"},
+		}, false},
+		{VersionRequirement{
+			VersionConstraint{">=", "v1.2.2"},
+			VersionConstraint{"<=", "v2.0.0"},
+		}, false},
+		{VersionRequirement{
+			VersionConstraint{">=", "v1.0.0"},
+			VersionConstraint{"~=", "v1.2.0"},
+		}, false},
+		{VersionRequirement{
+			VersionConstraint{"*"},
+			VersionConstraint{">=", "v1.2.3"},
+		}, false},
+	}
+
+	for _, test := range tests {
+		result := ShouldUpdate(test.requirement, latestVersion)
+
+		if result != test.expected {
+			t.Errorf("For requirement '%v', expected %v, but got %v", test.requirement, test.expected, result)
+		}
+	}
+}
+
+func TestCreateUpdateLevel(t *testing.T) {
+	tests := []struct {
+		requirement VersionRequirement
+		latest      string
+		expected    UpdateLevel
+		expectedErr error
+	}{
+		// Test cases for no requirement
+		{VersionRequirement{}, "v1.2.3", 0, fmt.Errorf("missing requirement")},
+
+		// Test cases for Major update level
+		{VersionRequirement{{">=", "v1.0.0"}}, "v2.0.0", Major, nil},
+		{VersionRequirement{{">=", "v1.0.0"}}, "v1.5.0", Minor, nil},
+		{VersionRequirement{{">=", "v1.0.0"}, {"<", "v2.0.0"}}, "v3.0.0", Major, nil},
+
+		// Test cases for Minor update level
+		{VersionRequirement{{">=", "v1.2.0"}}, "v1.2.3", Patch, nil},
+		{VersionRequirement{{">=", "v1.2.3"}, {"<", "v1.3.0"}}, "v1.2.5", Minor, nil},
+		{VersionRequirement{{"~=", "v1.2.0"}}, "v1.2.8", Patch, nil},
+
+		// Test cases for no update required
+		{VersionRequirement{{">=", "v1.2.3"}}, "v1.2.3", 0, nil},
+		{VersionRequirement{{">=", "v1.0.0"}}, "v1.0.0", 0, nil},
+		{VersionRequirement{{"~=", "v1.2.3"}}, "v1.2.3", 0, nil},
+	}
+
+	for _, test := range tests {
+		result, err := CreateUpdateLevel(test.requirement, test.latest)
+		if err != nil {
+			if test.expectedErr == nil || err.Error() != test.expectedErr.Error() {
+				t.Errorf("For requirement '%v' and latest version '%s', expected error '%v', but got '%v'", test.requirement, test.latest, test.expectedErr, err)
+			}
+			continue
+		}
+
+		if result != test.expected {
+			t.Errorf("For requirement '%v' and latest version '%s', expected update level '%v', but got '%v'", test.requirement, test.latest, test.expected, result)
+		}
+	}
+}
