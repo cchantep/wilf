@@ -14,6 +14,10 @@ func TestMatchConstraint(t *testing.T) {
 	}{
 		// Test cases for valid constraints
 		{
+			constraint: VersionConstraint{"==", "v1.2.3.4"}, // non standard
+			expected:   true,
+		},
+		{
 			constraint: VersionConstraint{">=", "v1.0.0"},
 			expected:   true,
 		},
@@ -124,8 +128,14 @@ func TestShouldUpdate(t *testing.T) {
 			VersionConstraint{">=", "v1.0.0"},
 			VersionConstraint{"~=", "v1.3.0"},
 		}, true},
+		{VersionRequirement{
+			VersionConstraint{"<", "v1.2.3.4"}, // non standard
+		}, true},
 
 		// Test cases for requirements that don't require an update
+		{VersionRequirement{
+			VersionConstraint{"==", latestVersion},
+		}, false},
 		{VersionRequirement{
 			VersionConstraint{">=", "v1.2.2"},
 		}, false},
@@ -147,6 +157,9 @@ func TestShouldUpdate(t *testing.T) {
 			VersionConstraint{"*"},
 			VersionConstraint{">=", "v1.2.3"},
 		}, false},
+		{VersionRequirement{
+			VersionConstraint{">", "v1.2.2.3"}, // non standard
+		}, false},
 	}
 
 	for _, test := range tests {
@@ -155,6 +168,16 @@ func TestShouldUpdate(t *testing.T) {
 		if result != test.expected {
 			t.Errorf("For requirement '%v', expected %v, but got %v", test.requirement, test.expected, result)
 		}
+	}
+
+	nonStandardRequirement := VersionRequirement{
+		VersionConstraint{"==", "v1.5.5.1"},
+	}
+
+	result := ShouldUpdate(nonStandardRequirement, "v1.5.5.1")
+
+	if result != false {
+		t.Errorf("For requirement '%v', expected %v, but got %v", nonStandardRequirement, false, result)
 	}
 }
 
@@ -171,6 +194,7 @@ func TestCreateUpdateLevel(t *testing.T) {
 		// Test cases for Major update level
 		{VersionRequirement{{">=", "v1.0.0"}}, "v2.0.0", Major, nil},
 		{VersionRequirement{{">=", "v1.0.0"}}, "v1.5.0", Minor, nil},
+		{VersionRequirement{{">=", "v1.0.0.0"}}, "v1.5.0", Minor, nil},
 		{VersionRequirement{{">=", "v1.0.0"}, {"<", "v2.0.0"}}, "v3.0.0", Major, nil},
 
 		// Test cases for Minor update level
@@ -196,5 +220,38 @@ func TestCreateUpdateLevel(t *testing.T) {
 		if result != test.expected {
 			t.Errorf("For requirement '%v' and latest version '%s', expected update level '%v', but got '%v'", test.requirement, test.latest, test.expected, result)
 		}
+	}
+}
+
+func TestNormalizeNonStandardVersion(t *testing.T) {
+	testCases := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "normal version",
+			input:    "1.2.3",
+			expected: "1.2.3",
+		},
+		{
+			name:     "non-standard version",
+			input:    "1.2.3.4",
+			expected: "1.2.3",
+		},
+		{
+			name:     "long non-standard version",
+			input:    "1.2.3.4.5.6",
+			expected: "1.2.3",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := NormalizeNonStandardVersion(tc.input)
+			if actual != tc.expected {
+				t.Errorf("expected %s but got %s", tc.expected, actual)
+			}
+		})
 	}
 }

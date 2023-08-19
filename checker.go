@@ -146,6 +146,12 @@ func MatchConstraint(
 		return ver == latest
 	}
 
+	normalizedLatest := latest
+
+	if !semver.IsValid(latest) {
+		normalizedLatest = NormalizeNonStandardVersion(latest)
+	}
+
 	if op == "~" || op == "!~" {
 		// '==' + version matching
 		re, err := CompileMatching(ver)
@@ -156,7 +162,7 @@ func MatchConstraint(
 			return false
 		}
 
-		matches := re.MatchString(latest)
+		matches := re.MatchString(normalizedLatest)
 
 		if op == "~" {
 			return matches
@@ -167,7 +173,14 @@ func MatchConstraint(
 
 	// ---
 
-	c := semver.Compare(latest, ver)
+	normalized := ver
+
+	if !semver.IsValid(ver) {
+		// Normalize non standard version
+		normalized = NormalizeNonStandardVersion(ver)
+	}
+
+	c := semver.Compare(normalizedLatest, normalized)
 
 	if op == "<=" {
 		return c <= 0
@@ -183,7 +196,7 @@ func MatchConstraint(
 
 	if op == "~=" {
 		// See https://peps.python.org/pep-0440/#compatible-release
-		return semver.Major(latest) == semver.Major(ver) && c >= 0
+		return semver.Major(normalizedLatest) == semver.Major(normalized) && c >= 0
 	}
 
 	if op == "==" {
@@ -199,6 +212,16 @@ func MatchConstraint(
 	}
 
 	return false
+}
+
+// NormalizeNonStandardVersion normalizes a non-standard version to a standard one.
+// It takes a version string as input and returns the first three segments
+// of the version string separated by a period.
+// For example, "1.2.3.4" would be normalized to "1.2.3".
+// This function is used to normalize non-standard version strings before
+// comparing them with standard version strings.
+func NormalizeNonStandardVersion(ver string) string {
+	return strings.Join(strings.Split(ver, ".")[0:3], ".")
 }
 
 // CompileMatching compiles a regular expression pattern that matches the given string.
@@ -240,8 +263,15 @@ func CreateUpdateLevel(
 
 		spec = strings.ReplaceAll(spec, "*", "0")
 
-		if semver.Compare(maxVer, spec) < 0 {
-			maxVer = spec
+		normalized := spec
+
+		if !semver.IsValid(spec) {
+			// Normalize non standard version
+			normalized = NormalizeNonStandardVersion(spec)
+		}
+
+		if semver.Compare(maxVer, normalized) < 0 {
+			maxVer = normalized
 		}
 	}
 
