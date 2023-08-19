@@ -11,6 +11,7 @@ var (
 	version string = "0" // Specified as build time: -ldflags '-X main.version=...'
 )
 
+// TODO: regex as exclude
 func main() {
 	args := os.Args[1:]
 

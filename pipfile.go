@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -178,7 +179,7 @@ NEXT_SPEC:
 
 				if n != ver {
 					// Was normalized as matching expr
-					if !semver.IsValid(n) {
+					if !IsValidVersion(n) {
 						return VersionRequirement{}, fmt.Errorf("invalid version: %s", spec)
 					}
 
@@ -189,7 +190,7 @@ NEXT_SPEC:
 					} else {
 						return VersionRequirement{}, fmt.Errorf("invalid version matching: %s", spec)
 					}
-				} else if !semver.IsValid(ver) {
+				} else if !IsValidVersion(ver) {
 					return VersionRequirement{}, fmt.Errorf("invalid version: %s", remaining)
 				}
 
@@ -206,4 +207,14 @@ NEXT_SPEC:
 	}
 
 	return verReq, nil
+}
+
+func IsValidVersion(version string) bool {
+	// Check non-standard version like zstd 1.5.5.1 (https://pypi.org/project/zstd/)
+	// which is not supported by semver
+	if match, _ := regexp.MatchString(`^v\d+\.\d+\.\d+(\.\d+)*$`, version); match {
+		return true
+	}
+
+	return semver.IsValid(version)
 }
