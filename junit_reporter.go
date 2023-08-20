@@ -15,6 +15,8 @@ type JUnitReporter struct {
 	RunTestSuite JUnitTestSuite
 }
 
+const JUnitReporterName = "junit"
+
 type testSuites struct {
 	XMLName  xml.Name         `xml:"testsuites"`
 	Name     string           `xml:"name,attr"`
@@ -55,6 +57,10 @@ type JUnitFailure struct {
 type JUnitSkipped struct {
 	Message string `xml:"message,attr"`
 	Text    string `xml:",chardata"`
+}
+
+func (r *JUnitReporter) ReporterName() string {
+	return JUnitReporterName
 }
 
 func (r *JUnitReporter) Before(out io.Writer) {

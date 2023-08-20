@@ -49,6 +49,8 @@ func ParseArguments(args []string) (CommandArguments, []Reporting, error) {
 			i++
 		} else if args[i] == "-h" {
 			printUsage = true
+
+			break
 		} else if args[i] == "-r" {
 			if i+1 >= len(args) {
 				return CommandArguments{}, []Reporting{},
@@ -82,26 +84,21 @@ func ParseArguments(args []string) (CommandArguments, []Reporting, error) {
 
 	if rl == 0 {
 		reporters = []string{"colorized-table"}
+		rl = 1
 	}
 
-	var updateReporters []Reporting
+	updateReporters := make([]Reporting, rl)
 
-	if rl == 0 {
-		updateReporters = []Reporting{}
-	} else {
-		updateReporters = make([]Reporting, rl)
+	for i, reporter := range reporters {
+		updateReporter, output, err := createReporter(reporter)
 
-		for i, reporter := range reporters {
-			updateReporter, output, err := createReporter(reporter)
+		if err != nil {
+			return CommandArguments{}, []Reporting{}, err
+		}
 
-			if err != nil {
-				return CommandArguments{}, []Reporting{}, err
-			}
-
-			updateReporters[i] = Reporting{
-				Reporter: updateReporter,
-				Output:   output,
-			}
+		updateReporters[i] = Reporting{
+			Reporter: updateReporter,
+			Output:   output,
 		}
 	}
 
@@ -133,7 +130,11 @@ func PrintUsage() {
 }
 
 func createReporter(reporter string) (UpdateReporter, io.Writer, error) {
-	validReporters := []string{"monochrome-table", "colorized-table", "junit"}
+	validReporters := []string{
+		MonochromeTableReporterName,
+		ColorizedTableReporterName,
+		JUnitReporterName,
+	}
 
 	if strings.HasPrefix(reporter, "junit:") {
 		path := strings.TrimPrefix(reporter, "junit:")
