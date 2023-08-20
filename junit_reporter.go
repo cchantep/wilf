@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"math"
 	"strings"
 	"time"
 )
@@ -64,9 +65,9 @@ func (r *JUnitReporter) ReporterName() string {
 }
 
 func (r *JUnitReporter) Before(out io.Writer) {
-	r.StartTime = time.Now()
-
 	ts := time.Now()
+
+	r.StartTime = ts
 
 	r.DevTestSuite = JUnitTestSuite{
 		Name:       "dev",
@@ -113,7 +114,7 @@ func (r *JUnitReporter) Report(
 	// Prepare the testCase representation
 	testCase := JUnitTestCase{
 		Name:      fmt.Sprintf("%s %s", packageName, updateLevel),
-		Time:      timeSec,
+		Time:      Trunc(timeSec),
 		Timestamp: time.Now().Format("2006-01-02T15:04:05"),
 	}
 
@@ -150,7 +151,7 @@ func finalizeTestSuite(suite *JUnitTestSuite) {
 	ts := suite._timestamp
 
 	suite.Tests = len(suite.TestCases)
-	suite.Time = time.Since(ts).Seconds()
+	suite.Time = SecondsSince(ts)
 	suite.Timestamp = ts.Format("2006-01-02T15:04:05")
 
 	for _, testCase := range suite.TestCases {
@@ -174,7 +175,7 @@ func (r *JUnitReporter) After(out io.Writer) {
 		Failures: r.DevTestSuite.Failures + r.RunTestSuite.Failures,
 		Errors:   r.DevTestSuite.Errors + r.RunTestSuite.Errors,
 		Skipped:  r.DevTestSuite.Skipped + r.RunTestSuite.Skipped,
-		Time:     time.Since(r.StartTime).Seconds(),
+		Time:     SecondsSince(r.StartTime),
 		Suites:   []JUnitTestSuite{r.DevTestSuite, r.RunTestSuite},
 	}
 
@@ -188,4 +189,13 @@ func (r *JUnitReporter) After(out io.Writer) {
 	xmlOutput := append(xmlHeader, xmlBody...)
 
 	fmt.Fprintln(out, string(xmlOutput))
+}
+
+func Trunc(f float64) float64 {
+	return math.Trunc(f*100) / 100
+}
+
+// SecondsSince returns the number of seconds elapsed since the given time.
+func SecondsSince(from time.Time) float64 {
+	return Trunc(time.Since(from).Seconds())
 }
