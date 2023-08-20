@@ -9,6 +9,9 @@ import (
 )
 
 type UpdateReporter interface {
+	// Returns a reporting name
+	ReporterName() string
+
 	Before(out io.Writer)
 
 	// Report an update for a package.
@@ -43,9 +46,14 @@ type UpdateReporter interface {
 // ---
 
 type TextReporter struct {
+	Name          string
 	MessageBefore string
 	Pattern       string
 	MessageAfter  string
+}
+
+func (r TextReporter) ReporterName() string {
+	return r.Name
 }
 
 // Before is a method of the UpdateReporter interface. It writes the MessageBefore field of the TextReporter struct to the output writer.
@@ -102,6 +110,8 @@ func (r TextReporter) After(out io.Writer) {
 
 // ---
 
+const MonochromeTableReporterName = "monochrome-table"
+
 // MonochromeTableReporter returns a TextReporter that formats the output of the report in a monochrome table format.
 // The function takes a version string as input and returns a TextReporter struct with MessageBefore, Pattern, and MessageAfter fields.
 // The MessageBefore field contains a formatted string with the version number and column headers.
@@ -109,6 +119,7 @@ func (r TextReporter) After(out io.Writer) {
 // The MessageAfter field is an empty string.
 func MonochromeTableReporter(version string) TextReporter {
 	return TextReporter{
+		Name:          MonochromeTableReporterName,
 		MessageBefore: fmt.Sprintf("-- wilf v%s --\nPackage         Wanted          Latest      Package type  Details\n", version),
 		Pattern:       "%-14.14[1]s\t%-12.12[2]s\t%-12.12[3]s%-12.12[5]s  %[4]s for %[1]s; %[7]s\n",
 		MessageAfter:  "",

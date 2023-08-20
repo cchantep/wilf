@@ -12,6 +12,10 @@ func TestColorizedTableReporterBeforeAfter(t *testing.T) {
 
 	reporter := ColorizedTableReporter{Version: "1.2.3"}
 
+	if reporter.ReporterName() != "colorized-table" {
+		t.Errorf("Unexpected reporter name: %s", reporter.ReporterName())
+	}
+
 	reporter.Before(&buf)
 
 	var expected bytes.Buffer
@@ -68,6 +72,10 @@ func TestColorizedTableReporterReportMajorDev(t *testing.T) {
 
 	reporter := ColorizedTableReporter{Version: "1.2.3"}
 
+	if reporter.ReporterName() != "colorized-table" {
+		t.Errorf("Unexpected reporter name: %s", reporter.ReporterName())
+	}
+
 	var expected bytes.Buffer
 
 	reporter.Report(
@@ -104,6 +112,10 @@ func TestColorizedTableReporterReportExcludedMajorDev(t *testing.T) {
 	var buf bytes.Buffer
 
 	reporter := ColorizedTableReporter{Version: "1.2.3"}
+
+	if reporter.ReporterName() != "colorized-table" {
+		t.Errorf("Unexpected reporter name: %s", reporter.ReporterName())
+	}
 
 	reporter.Report(
 		"github.com/test/package",

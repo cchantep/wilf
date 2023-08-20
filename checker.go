@@ -233,13 +233,20 @@ func CompileMatching(matching string) (*regexp.Regexp, error) {
 	return regexp.Compile(pattern)
 }
 
-// CreateUpdateLevel creates an update level based on the given version requirement and latest version.
+// CreateUpdateLevel creates an update level based on
+// the given version requirement and latest version.
+//
 // It returns an UpdateLevel and an error if any.
-// It loops through each constraint in the requirement and finds the highest version that matches the constraint.
-// It then compares the highest version with the latest version to determine the update level.
-// If the latest version is a major version ahead of the highest version, it returns Major.
-// If the latest version is a minor version ahead of the highest version, it returns Minor.
-// If the latest version is a patch version ahead of the highest version, it returns Patch.
+// It loops through each constraint in the requirement
+// and finds the highest version that matches the constraint.
+// It then compares the highest version with the latest version
+// to determine the update level.
+// If the latest version is a major version ahead of the highest version,
+// it returns Major.
+// If the latest version is a minor version ahead of the highest version,
+// it returns Minor.
+// If the latest version is a patch version ahead of the highest version,
+// it returns Patch.
 // If the latest version is the same as the highest version, it returns 0.
 // If the requirement is empty, it returns an error.
 func CreateUpdateLevel(

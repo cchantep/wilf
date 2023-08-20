@@ -9,8 +9,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const ColorizedTableReporterName = "colorized-table"
+
 type ColorizedTableReporter struct {
 	Version string
+}
+
+func (r ColorizedTableReporter) ReporterName() string {
+	return ColorizedTableReporterName
 }
 
 func (r ColorizedTableReporter) Before(out io.Writer) {

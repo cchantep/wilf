@@ -22,6 +22,7 @@ func TestTextReporter(t *testing.T) {
 		{
 			name: "Test case 1",
 			reporter: TextReporter{
+				Name:          "reporter1",
 				MessageBefore: "",
 				Pattern:       "%s %s %s %s %s %.0f %s",
 				MessageAfter:  "",
@@ -37,6 +38,7 @@ func TestTextReporter(t *testing.T) {
 		{
 			name: "Test case 2",
 			reporter: TextReporter{
+				Name:          "reporter2",
 				MessageBefore: "",
 				Pattern:       "%s %s %s %s %s %.0f %s\n",
 				MessageAfter:  "",
@@ -54,6 +56,11 @@ func TestTextReporter(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			var buf bytes.Buffer
+
+			if tc.reporter.ReporterName() != tc.reporter.Name {
+				t.Fatalf("unexpected reporter name: %s", tc.reporter.ReporterName())
+			}
+
 			err := tc.reporter.Report(
 				tc.packageName,
 				tc.requirement,
@@ -110,6 +117,10 @@ func TestMonochromeTableReporter(t *testing.T) {
 	var buf bytes.Buffer
 
 	reporter := MonochromeTableReporter("1.0.0")
+
+	if reporter.ReporterName() != "monochrome-table" {
+		t.Errorf("Unexpected reporter name: %s", reporter.ReporterName())
+	}
 
 	reporter.Before(&buf)
 
