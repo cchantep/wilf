@@ -10,12 +10,13 @@ func TestGetPromptlibProjectInfo(t *testing.T) {
 	// Create a GitlabRegistryConfig struct with the URL
 	// and token for a public project
 	config := GitlabRegistryConfig{
-		ProjectApiPackagesUrl: "https://gitlab.com/api/v4/projects/46678122/packages",
+		ProjectApiPackagesUrl: "https://gitlab.com/api/v4/projects/40752351/packages",
 		PrivateToken:          "",
 	}
 
 	// Test a package that exists in the project
-	projectInfo, err := GetGitlabProjectInfo(config, "promptlib")
+	expectedPkg := "gitlab-bot-hall-monitor"
+	projectInfo, err := GetGitlabProjectInfo(config, expectedPkg)
 
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
@@ -25,8 +26,9 @@ func TestGetPromptlibProjectInfo(t *testing.T) {
 		t.Errorf("Expected projectInfo to be non-nil")
 	}
 
-	if projectInfo.Name != "promptlib" {
-		t.Errorf("Expected projectInfo.Name to be 'promptlib', got '%s'", projectInfo.Name)
+	if projectInfo.Name != expectedPkg {
+		t.Errorf("Expected projectInfo.Name to be '%s', got '%s'",
+			expectedPkg, projectInfo.Name)
 	}
 
 	if semver.Compare(projectInfo.Version, "v0.1.3") < 0 {

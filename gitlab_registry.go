@@ -123,27 +123,32 @@ func GetGitlabProjectInfo(
 	// ---
 
 	// Check if the response is empty
-	if len(projectInfo) == 0 {
+	l := len(projectInfo)
+
+	if l == 0 {
 		return nil, nil
 	}
 
-	// Check if the response contains more than one element
+	/* TODO? Check if the response contains more than one element
 	if len(projectInfo) > 1 {
-		return nil, errors.New("The Gitlab API indicates more than one project with the same name")
+		Warn? The Gitlab API indicates more than one project with the same name
 	}
+	*/
 
 	// ---
+
+	info := projectInfo[l-1]
 
 	urlParts := strings.SplitAfterN(gitlabConfig.ProjectApiPackagesUrl, "/", 4)
 	homeUrl := fmt.Sprintf("%s%s",
 		strings.Join(urlParts[0:3], ""),
-		strings.TrimPrefix(projectInfo[0].Links.WebPath, "/"),
+		strings.TrimPrefix(info.Links.WebPath, "/"),
 	)
 
 	// Return the first element of the slice
 	return &ProjectInfo{
-		Name:    projectInfo[0].Name,
-		Version: fmt.Sprintf("v%s", projectInfo[0].Version),
+		Name:    info.Name,
+		Version: fmt.Sprintf("v%s", info.Version),
 		Summary: "",
 		HomeURL: homeUrl,
 	}, nil

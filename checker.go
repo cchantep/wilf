@@ -119,6 +119,38 @@ func ShouldUpdate(
 	return false
 }
 
+func AreCompatibles(a, b VersionRequirement) bool {
+	for _, ac := range a {
+		ao := ac[0]
+
+		if ao == "*" {
+			continue
+		}
+
+		for _, bc := range b {
+			bo := bc[0]
+
+			if bo == "*" {
+				continue
+			}
+
+			if bo == "==" && MatchConstraint(bc[1], ac) {
+				continue
+			}
+
+			if ao == "==" && MatchConstraint(ac[1], bc) {
+				continue
+			}
+
+			if !MatchConstraint(bc[1], ac) || !MatchConstraint(ac[1], bc) {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
 // MatchConstraint checks if the latest version matches the given constraint.
 // It returns a boolean indicating whether the latest version matches the constraint or not.
 // It supports the following operators from PEP-404 (https://peps.python.org/pep-0440):

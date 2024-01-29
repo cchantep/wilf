@@ -10,6 +10,7 @@ func TestPypiRequiredUpdate(t *testing.T) {
 	tests := []struct {
 		pkg           string
 		requirement   VersionRequirement
+		pythonVersion VersionRequirement
 		expectedVer   string
 		expectedLvl   UpdateLevel
 		expectedUrl   string
@@ -32,9 +33,9 @@ func TestPypiRequiredUpdate(t *testing.T) {
 			requirement: VersionRequirement{
 				VersionConstraint{"<", "v1.24.0"},
 			},
-			expectedVer:   "v1.25.2",
+			expectedVer:   "v1.26.3",
 			expectedLvl:   Minor,
-			expectedUrl:   "https://www.numpy.org",
+			expectedUrl:   "https://numpy.org",
 			expectedError: nil,
 		},
 		// Test case for an existing package with major update required
@@ -43,8 +44,22 @@ func TestPypiRequiredUpdate(t *testing.T) {
 			requirement: VersionRequirement{
 				VersionConstraint{"~=", "v6.0"},
 			},
-			expectedVer:   "v7.4.0",
+			expectedVer:   "v8.0.0",
 			expectedLvl:   Major,
+			expectedUrl:   "https://docs.pytest.org/en/latest/",
+			expectedError: nil,
+		},
+		// Test case with python version incompatible with update
+		{
+			pkg: "pytest",
+			requirement: VersionRequirement{
+				VersionConstraint{"~=", "v6.0"},
+			},
+			pythonVersion: VersionRequirement{
+				VersionConstraint{"==", "v3.7"},
+			},
+			expectedVer:   "v8.0.0",
+			expectedLvl:   0,
 			expectedUrl:   "https://docs.pytest.org/en/latest/",
 			expectedError: nil,
 		},
@@ -62,6 +77,8 @@ func TestPypiRequiredUpdate(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		pypiChecker.PythonRequirement = test.pythonVersion
+
 		ver, lvl, url, err := pypiChecker.RequiredUpdate(test.pkg, test.requirement)
 
 		if (err == nil && test.expectedError != nil) ||

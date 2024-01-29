@@ -9,10 +9,11 @@ import (
 )
 
 type ProjectInfo struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
-	Summary string `json:"summary"`
-	HomeURL string `json:"home_page"`
+	Name           string `json:"name"`
+	Version        string `json:"version"`
+	RequiresPython string `json:"requires_python"`
+	Summary        string `json:"summary"`
+	HomeURL        string `json:"home_page"`
 }
 
 func GetProjectInfo(packageName string) (*ProjectInfo, error) {
@@ -47,8 +48,7 @@ func GetProjectInfo(packageName string) (*ProjectInfo, error) {
 
 	// Check if the 'info' field is nil
 	if projectInfo.Info.Name != "" {
-		projectInfo.Info.Version = fmt.Sprintf(
-			"v%s", projectInfo.Info.Version)
+		projectInfo.Info.Version = fmt.Sprintf("v%s", projectInfo.Info.Version)
 
 		return &projectInfo.Info, nil
 	}

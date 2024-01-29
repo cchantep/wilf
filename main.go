@@ -79,7 +79,7 @@ func main() {
 		return
 	}
 
-	checker := CreateCompositeChecker(config)
+	checker := CreateCompositeChecker(config, pipfile.RequiresPythonVersion)
 
 	reportUpdates := func(
 		dependencies Dependencies,

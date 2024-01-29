@@ -28,4 +28,4 @@ ipsum = { markers = "sys_platform == 'darwin' and platform_machine == 'arm64'", 
 numpy = "==1.23.3"
 
 [requires]
-python_version = "3.8"
+python_version = ">=3.8"
