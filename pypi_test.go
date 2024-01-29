@@ -13,10 +13,11 @@ func TestGetProjectInfo(t *testing.T) {
 	}
 
 	expected := &ProjectInfo{
-		Name:    "requests",
-		Version: "v2.31.0",
-		Summary: "Python HTTP for Humans.",
-		HomeURL: "https://requests.readthedocs.io",
+		Name:           "requests",
+		Version:        "v2.31.0",
+		RequiresPython: ">=3.7",
+		Summary:        "Python HTTP for Humans.",
+		HomeURL:        "https://requests.readthedocs.io",
 	}
 
 	if !reflect.DeepEqual(result, expected) {

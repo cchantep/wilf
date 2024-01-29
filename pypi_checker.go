@@ -2,6 +2,7 @@ package main
 
 // PypiChecker is a struct that represents a PyPI checker.
 type PypiChecker struct {
+	PythonRequirement VersionRequirement
 }
 
 // RequiredUpdate checks if a package requires an update.
@@ -19,6 +20,20 @@ func (c PypiChecker) RequiredUpdate(
 
 	if info == nil {
 		return "", 0, "", nil
+	}
+
+	if info.RequiresPython != "" && len(c.PythonRequirement) > 0 {
+		pkgPythonReq, err := ParseVersionRequirement(info.RequiresPython)
+
+		if err != nil {
+			return "", 0, "", err
+		}
+
+		if !AreCompatibles(c.PythonRequirement, pkgPythonReq) {
+			// Python version are not compatible,
+			// so package itself should not be updated
+			return info.Version, 0, info.HomeURL, nil
+		}
 	}
 
 	if !ShouldUpdate(requirement, info.Version) {

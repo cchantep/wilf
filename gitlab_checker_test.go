@@ -6,18 +6,18 @@ import (
 
 func TestGitlabChecker(t *testing.T) {
 	checker := GitlabChecker{Config: GitlabRegistryConfig{
-		ProjectApiPackagesUrl: "https://gitlab.com/api/v4/projects/46678122/packages",
+		ProjectApiPackagesUrl: "https://gitlab.com/api/v4/projects/40752351/packages",
 		PrivateToken:          "",
 	}}
 
 	// Test existing project with required major update
-	pkg := "promptlib"
+	pkg := "gitlab-bot-hall-monitor"
 	req := VersionRequirement{
 		VersionConstraint{">=", "v2.26.0"},
 	}
-	expectedVersion := "v0.1.3"
+	expectedVersion := "v1.0.19"
 	expectedLevel := Major
-	expectedUrl := "https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/prompt-library/-/packages/16106475"
+	expectedUrl := "https://gitlab.com/gitlab-org/secure/tools/gitlab-bot-hall-monitor/-/packages/11705498"
 	version, level, url, err := checker.RequiredUpdate(pkg, req)
 
 	if err != nil {

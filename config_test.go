@@ -4,6 +4,28 @@ import (
 	"testing"
 )
 
+func TestLoadSettings(t *testing.T) {
+	// Load the settings from the fixture file
+	settings, err := LoadSettings("resources/valid-settings.toml")
+
+	if err != nil {
+		t.Fatalf("Failed to load settings: %v", err)
+	}
+
+	// Verify the loaded settings match the expected values
+	if !settings.CheckDevPackages {
+		t.Errorf("Expected CheckDevPackages to be true, but got false")
+	}
+
+	if len(settings.ExcludedPackages) != 2 || settings.ExcludedPackages[0] != "pkg1" || settings.ExcludedPackages[1] != "pkg2" {
+		t.Errorf("Expected ExcludedPackages to be [\"pkg1\", \"pkg2\"], but got %v", settings.ExcludedPackages)
+	}
+
+	if settings.UpdateLevel != Major {
+		t.Errorf("Expected UpdateLevel to be Major, but got %v", settings.UpdateLevel)
+	}
+}
+
 func TestLoadSettingsOnlyConfig(t *testing.T) {
 	path := "resources/valid-settings.toml"
 	config, err := LoadConfig(path)
@@ -21,28 +43,6 @@ func TestLoadSettingsOnlyConfig(t *testing.T) {
 	}
 
 	settings := config.Settings
-
-	// Verify the loaded settings match the expected values
-	if !settings.CheckDevPackages {
-		t.Errorf("Expected CheckDevPackages to be true, but got false")
-	}
-
-	if len(settings.ExcludedPackages) != 2 || settings.ExcludedPackages[0] != "pkg1" || settings.ExcludedPackages[1] != "pkg2" {
-		t.Errorf("Expected ExcludedPackages to be [\"pkg1\", \"pkg2\"], but got %v", settings.ExcludedPackages)
-	}
-
-	if settings.UpdateLevel != Major {
-		t.Errorf("Expected UpdateLevel to be Major, but got %v", settings.UpdateLevel)
-	}
-}
-
-func TestLoadSettings(t *testing.T) {
-	// Load the settings from the fixture file
-	settings, err := LoadSettings("resources/valid-settings.toml")
-
-	if err != nil {
-		t.Fatalf("Failed to load settings: %v", err)
-	}
 
 	// Verify the loaded settings match the expected values
 	if !settings.CheckDevPackages {
@@ -88,5 +88,4 @@ func TestLoadConfigWithGitlabRegistry(t *testing.T) {
 	if settings.UpdateLevel != Minor {
 		t.Errorf("Expected UpdateLevel to be Minor, but got %v", settings.UpdateLevel)
 	}
-
 }

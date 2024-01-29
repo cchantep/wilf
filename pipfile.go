@@ -17,14 +17,16 @@ type VersionRequirement = []VersionConstraint
 type Dependencies = map[string]VersionRequirement
 
 type Pipfile struct {
-	RuntimeDependencies Dependencies
-	DevDependencies     Dependencies
+	RuntimeDependencies   Dependencies
+	DevDependencies       Dependencies
+	RequiresPythonVersion VersionRequirement
 }
 
 func ParsePipfile(reader io.Reader) (Pipfile, error) {
 	pipfile := Pipfile{
-		RuntimeDependencies: make(Dependencies),
-		DevDependencies:     make(Dependencies),
+		RuntimeDependencies:   make(Dependencies),
+		DevDependencies:       make(Dependencies),
+		RequiresPythonVersion: VersionRequirement{},
 	}
 
 	scanner := bufio.NewScanner(reader)
@@ -63,6 +65,21 @@ func ParsePipfile(reader io.Reader) (Pipfile, error) {
 
 		key := strings.TrimSpace(parts[0])
 		value := strings.TrimSpace(parts[1])
+
+		if currentSection == "requires" {
+			if key == "python_version" {
+				value = strings.Trim(value, `"'`)
+				versionReq, err := ParseVersionRequirement(value)
+
+				if err != nil {
+					return Pipfile{}, err
+				}
+
+				pipfile.RequiresPythonVersion = versionReq
+
+				continue
+			}
+		}
 
 		if strings.HasPrefix(value, "{") && strings.HasSuffix(value, "}") {
 			// Value is a dictionary, parse it
@@ -203,7 +220,13 @@ NEXT_SPEC:
 			}
 		}
 
-		verReq = append(verReq, VersionConstraint{"==", spec})
+		ver := fmt.Sprintf("v%s", spec)
+
+		if !IsValidVersion(ver) {
+			return VersionRequirement{}, fmt.Errorf("invalid version: %s", spec)
+		}
+
+		verReq = append(verReq, VersionConstraint{"==", ver})
 	}
 
 	return verReq, nil

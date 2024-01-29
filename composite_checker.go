@@ -23,10 +23,17 @@ func (c CompositeChecker) RequiredUpdate(
 
 // CreateCompositeChecker creates a new CompositeChecker with a PypiChecker as the first element.
 // If config.Gitlab is not nil, a corresponding instance of GitlabChecker is appended to the CompositeChecker.
-func CreateCompositeChecker(config *Config) CompositeChecker {
-	checkers := CompositeChecker{&PypiChecker{}}
+func CreateCompositeChecker(
+	config *Config,
+	pythonRequirement VersionRequirement,
+) CompositeChecker {
+	var checkers CompositeChecker
 
 	if config != nil {
+		checkers = append(checkers, &PypiChecker{
+			PythonRequirement: pythonRequirement,
+		})
+
 		if config.Gitlab != nil {
 			checkers = append(checkers, &GitlabChecker{
 				Config: *config.Gitlab,

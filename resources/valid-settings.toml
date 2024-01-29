@@ -1,3 +1,4 @@
 check_dev_packages = true
 excluded_packages = ["pkg1", "pkg2"]
 update_level = "major"
+python_version = "3.8.7"

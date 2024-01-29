@@ -97,13 +97,15 @@ func TestParsePipfile(t *testing.T) {
 						VersionConstraint{"*", "*"},
 					},
 				},
+				RequiresPythonVersion: VersionRequirement{},
 			},
 		},
 		{
 			path: "resources/valid2.pipfile",
 			expected: Pipfile{
-				RuntimeDependencies: make(Dependencies),
-				DevDependencies:     make(Dependencies),
+				RuntimeDependencies:   make(Dependencies),
+				DevDependencies:       make(Dependencies),
+				RequiresPythonVersion: VersionRequirement{},
 			},
 		},
 		{
@@ -182,6 +184,12 @@ func TestParsePipfile(t *testing.T) {
 						},
 					},
 				},
+				RequiresPythonVersion: VersionRequirement{
+					VersionConstraint{
+						">=",
+						"v3.8",
+					},
+				},
 			},
 		},
 	}
@@ -196,11 +204,14 @@ func TestParsePipfile(t *testing.T) {
 		result, err := ParsePipfile(file)
 
 		if err != nil {
-			t.Errorf("Error occurred while parsing Pipfile: %v", err)
+			t.Errorf("Error occurred while parsing Pipfile '%s': %v",
+				test.path, err)
 		}
 
 		if !reflect.DeepEqual(result, test.expected) {
-			t.Errorf("Expected result: %v, got: %v", test.expected, result)
+			t.Errorf("Expected result for '%s': %v, got: %v",
+				test.path, test.expected, result,
+			)
 		}
 	}
 }
@@ -282,16 +293,21 @@ func TestParseVersionRequirement(t *testing.T) {
 			err:      fmt.Errorf("missing version: ~="),
 		},
 		{
-			input: "some value",
-			expected: VersionRequirement{
-				VersionConstraint{"==", "some value"},
-			},
-			err: nil,
+			input:    "some value",
+			expected: VersionRequirement{},
+			err:      fmt.Errorf("invalid version: some value"),
 		},
 		{
 			input: "*",
 			expected: VersionRequirement{
 				VersionConstraint{"*", "*"},
+			},
+			err: nil,
+		},
+		{
+			input: "3.7",
+			expected: VersionRequirement{
+				VersionConstraint{"==", "v3.7"},
 			},
 			err: nil,
 		},
@@ -307,11 +323,15 @@ func TestParseVersionRequirement(t *testing.T) {
 		if test.err != nil && err == nil {
 			t.Errorf("Expected parse error: %v, got: %v",
 				test.err, err)
+
+			continue
 		}
 
 		if len(test.expected) != len(req) {
 			t.Errorf("Expected requirement: %v, got: %v",
 				test.expected, req)
+
+			continue
 		}
 
 		for i, c := range test.expected {

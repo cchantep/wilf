@@ -181,6 +181,48 @@ func TestShouldUpdate(t *testing.T) {
 	}
 }
 
+func TestAreCompatibles(t *testing.T) {
+	tests := []struct {
+		a        VersionRequirement
+		b        VersionRequirement
+		expected bool
+	}{
+		{
+			VersionRequirement{VersionConstraint{">=", "v1.0.0"}},
+			VersionRequirement{VersionConstraint{"<", "v2.1"}},
+			true,
+		},
+		{
+			VersionRequirement{VersionConstraint{">=", "v1.0.0"}},
+			VersionRequirement{VersionConstraint{"==", "v0.2.1"}},
+			false,
+		},
+		{
+			VersionRequirement{VersionConstraint{"<", "v1.0.0"}},
+			VersionRequirement{VersionConstraint{">=", "v2.1"}},
+			false,
+		},
+		{
+			VersionRequirement{VersionConstraint{"<", "v1.0.0"}},
+			VersionRequirement{VersionConstraint{"==", "v0.1"}},
+			true,
+		},
+		{
+			VersionRequirement{VersionConstraint{"<", "v1.0.0"}},
+			VersionRequirement{VersionConstraint{">=", "v0.2.3"}},
+			true,
+		},
+	}
+
+	for _, test := range tests {
+		result := AreCompatibles(test.a, test.b)
+
+		if result != test.expected {
+			t.Errorf("For requirements %v & %v, expected compatibility %v, but got %v", test.a, test.b, test.expected, result)
+		}
+	}
+}
+
 func TestCreateUpdateLevel(t *testing.T) {
 	tests := []struct {
 		requirement VersionRequirement
