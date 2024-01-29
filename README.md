@@ -95,3 +95,17 @@ Build the [Docker image](https://hub.docker.com/r/cchantep/wilf):
 VERSION=... \
 docker build --build-arg "version=$VERSION" -t "cchantep/wilf:$VERSION" .
 ```
+
+### Release
+
+Add a release tag:
+
+    git tag -a 1.2.3 -m '...'
+
+Build the Docker image:
+
+    ./tooling/scripts/docker_build.sh
+
+Publish the Docker image:
+
+    docker.io/cchantep/wilf:1.2.3
