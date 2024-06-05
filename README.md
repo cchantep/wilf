@@ -92,9 +92,11 @@ Run the tests: [![CI](https://github.com/cchantep/wilf/actions/workflows/ci.yml/
 Build the [Docker image](https://hub.docker.com/r/cchantep/wilf):
 
 ```bash
-VERSION=... \
-docker build --build-arg "version=$VERSION" -t "cchantep/wilf:$VERSION" .
+export VERSION=...
+docker buildx build --push --platform=linux/amd64,linux/arm64 --build-arg "version=$VERSION" -t "cchantep/wilf:$VERSION" .
 ```
+
+> See [Docker documentation](https://www.docker.com/blog/faster-multi-platform-builds-dockerfile-cross-compilation-guide/)
 
 ### Release
 
