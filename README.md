@@ -28,7 +28,7 @@ wilf -r junit:/tmp/junit.xml -r colorized-table
 With Docker: ![Docker Latest Image](https://img.shields.io/docker/v/cchantep/wilf)
 
 ```bash
-docker run --rm -it cchantep/wilf [arguments...]
+docker run --rm -it cchantep/wilf:$VERSION [arguments...]
 ```
 
 ## Configuration
