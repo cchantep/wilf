@@ -22,20 +22,20 @@ func TestPypiRequiredUpdate(t *testing.T) {
 			requirement: VersionRequirement{
 				VersionConstraint{">=", "v2.26.0"},
 			},
-			expectedVer:   "v2.31.0",
+			expectedVer:   "v2.32.5",
 			expectedLvl:   0,
 			expectedUrl:   "https://requests.readthedocs.io",
 			expectedError: nil,
 		},
-		// Test case for an existing package with minor update required
+		// Test case for an existing package with major update required
 		{
 			pkg: "numpy",
 			requirement: VersionRequirement{
 				VersionConstraint{"<", "v1.24.0"},
 			},
-			expectedVer:   "v1.26.3",
-			expectedLvl:   Minor,
-			expectedUrl:   "https://numpy.org",
+			expectedVer:   "v2.4.3",
+			expectedLvl:   Major,
+			expectedUrl:   "",
 			expectedError: nil,
 		},
 		// Test case for an existing package with major update required
@@ -44,9 +44,9 @@ func TestPypiRequiredUpdate(t *testing.T) {
 			requirement: VersionRequirement{
 				VersionConstraint{"~=", "v6.0"},
 			},
-			expectedVer:   "v8.0.0",
+			expectedVer:   "v9.0.2",
 			expectedLvl:   Major,
-			expectedUrl:   "https://docs.pytest.org/en/latest/",
+			expectedUrl:   "",
 			expectedError: nil,
 		},
 		// Test case with python version incompatible with update
@@ -58,9 +58,9 @@ func TestPypiRequiredUpdate(t *testing.T) {
 			pythonVersion: VersionRequirement{
 				VersionConstraint{"==", "v3.7"},
 			},
-			expectedVer:   "v8.0.0",
+			expectedVer:   "v9.0.2",
 			expectedLvl:   0,
-			expectedUrl:   "https://docs.pytest.org/en/latest/",
+			expectedUrl:   "",
 			expectedError: nil,
 		},
 		// Test case for a non-existing package

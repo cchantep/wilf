@@ -30,6 +30,12 @@ func main() {
 		return
 	}
 
+	if commandArgs.PrintVersion {
+		fmt.Println(version)
+		os.Exit(0)
+		return
+	}
+
 	if commandArgs.Verbose {
 		log.SetLevel(log.DebugLevel)
 		log.Debugf("Command arguments: %s", commandArgs)

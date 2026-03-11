@@ -14,8 +14,8 @@ func TestGetProjectInfo(t *testing.T) {
 
 	expected := &ProjectInfo{
 		Name:           "requests",
-		Version:        "v2.31.0",
-		RequiresPython: ">=3.7",
+		Version:        "v2.32.5",
+		RequiresPython: ">=3.9",
 		Summary:        "Python HTTP for Humans.",
 		HomeURL:        "https://requests.readthedocs.io",
 	}

@@ -12,10 +12,12 @@ Options:
 - `-h` : Print the usage and exit
 - `-r REPORTER` : Use REPORTER as the reporter; It can be specified multi time to set multiple reporters; Valid options are `monochrome-table`, `colorized-table` (the default one), `junit` (JUnit reporting on stdout), or `junit:/path/to/output/junit.xml`
 - `-v` : Enable verbose output
+- `--version` : Print version and exit
 
 Example:
 
 ```bash
+wilf --version  # Print version
 wilf -h  # Print usage
 wilf /path/to/Pipfile  # Minimal usage
 wilf -c /path/to/config.toml -r junit /path/to/Pipfile
