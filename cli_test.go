@@ -64,6 +64,13 @@ func TestParseArguments(t *testing.T) {
 			},
 			expectedReporters: []string{"colorized-table"},
 		},
+		{
+			name: "print version argument",
+			args: []string{"--version"},
+			expected: CommandArguments{
+				PrintVersion: true,
+			},
+		},
 		/*TODO{
 			name: "print usage argument",
 			args: []string{"-h"},

@@ -9,11 +9,12 @@ import (
 
 // CommandArguments represents the parsed command line arguments.
 type CommandArguments struct {
-	Verbose    bool
-	Config     string
-	Pipfile    string
-	PrintUsage bool
-	Reporters  string // comma separated list of reporters
+	Verbose      bool
+	Config       string
+	Pipfile      string
+	PrintUsage   bool
+	PrintVersion bool
+	Reporters    string // comma separated list of reporters
 }
 
 type Reporting struct {
@@ -35,8 +36,13 @@ func ParseArguments(args []string) (CommandArguments, []Reporting, error) {
 			fmt.Errorf("please provide the path to the Pipfile as an argument")
 	}
 
+	var printVersion bool
+
 	for i := 0; i < len(args); i++ {
-		if args[i] == "-v" {
+		if args[i] == "--version" {
+			printVersion = true
+			break
+		} else if args[i] == "-v" {
 			verbose = true
 		} else if args[i] == "-c" {
 			if i+1 >= len(args) {
@@ -67,6 +73,12 @@ func ParseArguments(args []string) (CommandArguments, []Reporting, error) {
 		} else {
 			pipfile = args[i]
 		}
+	}
+
+	if printVersion {
+		return CommandArguments{
+			PrintVersion: true,
+		}, []Reporting{}, nil
 	}
 
 	if printUsage {
@@ -103,19 +115,22 @@ func ParseArguments(args []string) (CommandArguments, []Reporting, error) {
 	}
 
 	return CommandArguments{
-		Verbose:    verbose,
-		Config:     config,
-		Pipfile:    pipfile,
-		PrintUsage: printUsage,
-		Reporters:  strings.Join(reporters, ", "),
+		Verbose:      verbose,
+		Config:       config,
+		Pipfile:      pipfile,
+		PrintUsage:   printUsage,
+		PrintVersion: printVersion,
+		Reporters:    strings.Join(reporters, ", "),
 	}, updateReporters, nil
 }
 
 func (args CommandArguments) String() string {
-	return fmt.Sprintf("{Verbose: %v, Config: '%s', Pipfile: '%s', Reporter: '%s'}",
+	return fmt.Sprintf("{Verbose: %v, Config: '%s', Pipfile: '%s', PrintUsage: %v, PrintVersion: %v, Reporter: '%s'}",
 		args.Verbose,
 		args.Config,
 		args.Pipfile,
+		args.PrintUsage,
+		args.PrintVersion,
 		args.Reporters,
 	)
 }
@@ -127,6 +142,7 @@ func PrintUsage() {
 	fmt.Println("  -h           Print this help message and exit")
 	fmt.Println("  -r REPORTER  Use REPORTER as the reporter. It can be specified multi time to apply multiple reporters. Valid options are monochrome-table, colorized-table (default), junit or junit:/path/to/output/junit.xml")
 	fmt.Println("  -v           Enable verbose output")
+	fmt.Println("  --version    Print version and exit")
 }
 
 func createReporter(reporter string) (UpdateReporter, io.Writer, error) {
