@@ -112,4 +112,4 @@ Build the Docker image:
 
 Publish the Docker image:
 
-    docker.io/cchantep/wilf:1.2.3
+    docker push docker.io/cchantep/wilf:1.2.3
